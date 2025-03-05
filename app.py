@@ -58,9 +58,6 @@ class Student(db.Model):
 def init_db():
     try:
         with app.app_context():
-            # Drop all existing tables (uncomment only for testing)
-            # db.drop_all()
-            
             # Create all tables
             db.create_all()
             print("Database tables created successfully")
@@ -68,9 +65,8 @@ def init_db():
         print(f"Error creating database tables: {e}")
         raise
 
-# Initialize database before first request
-@app.before_first_request
-def create_tables():
+# Initialize database when the app starts
+with app.app_context():
     init_db()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -136,5 +132,4 @@ def student_dashboard():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
