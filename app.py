@@ -16,16 +16,15 @@ cloudinary.config(
 app = Flask(__name__)
 
 # PostgreSQL Configuration
-# Parse the DATABASE_URL to handle special characters
 def get_database_url():
-    # First, try to get the database URL from environment
+    # Try to get the database URL from environment
     db_url = os.getenv('DATABASE_URL')
     
-    # If not found, fall back to a local SQLite database
+    # If not found, fall back to SQLite
     if not db_url:
         return 'sqlite:///students.db'
     
-    # If using Render's Postgres URL, modify it to work with SQLAlchemy
+    # Modify Postgres URL to work with SQLAlchemy
     if db_url.startswith('postgres://'):
         db_url = db_url.replace('postgres://', 'postgresql://', 1)
     
@@ -39,7 +38,10 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
 # Initialize database
 db = SQLAlchemy(app)
 
+# Define Student Model
 class Student(db.Model):
+    __tablename__ = 'students'  # Explicitly set table name
+    
     id = db.Column(db.Integer, primary_key=True)
     roll_number = db.Column(db.String(50), unique=True, nullable=False)
     first_name = db.Column(db.String(50), nullable=False)
@@ -51,6 +53,25 @@ class Student(db.Model):
     phone_number = db.Column(db.String(15), nullable=False)
     video_url = db.Column(db.String(255))
     selfie_url = db.Column(db.String(255))
+
+# Database initialization with error handling
+def init_db():
+    try:
+        with app.app_context():
+            # Drop all existing tables (uncomment only for testing)
+            # db.drop_all()
+            
+            # Create all tables
+            db.create_all()
+            print("Database tables created successfully")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
+        raise
+
+# Initialize database before first request
+@app.before_first_request
+def create_tables():
+    init_db()
 
 @app.route('/', methods=['GET', 'POST'])
 def student_dashboard():
@@ -114,11 +135,6 @@ def student_dashboard():
     
     return render_template('index.html')
 
-# Database initialization
-def init_db():
-    with app.app_context():
-        db.create_all()
-#edited
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
