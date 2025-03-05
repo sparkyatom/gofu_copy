@@ -1,93 +1,683 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        
+        .soft-bg {
+            background: linear-gradient(120deg, #e0f2fe 0%, #dbeafe 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+            border-color: #bfdbfe;
+        }
+        
+        .btn-primary-soft {
+            background-color: #3b82f6;
+            color: white;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .btn-primary-soft:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-outline-soft {
+            background-color: white;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+        
+        .btn-outline-soft:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 1rem;
+            color: #94a3b8;
+        }
+        
+        .input-with-icon {
+            padding-left: 2.5rem;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            color: white;
+            padding: 1rem 0;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .avatar-container {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background-color: #bfdbfe;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1e40af;
+            font-size: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .badge-blue {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-purple {
+            background-color: #ede9fe;
+            color: #5b21b6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .card-title {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .floating-btn:hover {
+            transform: scale(1.1);
+            background: #2563eb;
+        }
+        
+        .section-heading {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #3b82f6;
+            border-radius: 3px;
+        }
+        
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            border: 1px dashed #94a3b8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-wrapper:hover {
+            background: #f1f5f9;
+            border-color: #60a5fa;
+        }
+        
+        .file-upload-wrapper input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-upload-text {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        
+        .spinner-grow {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Student Registration Form</h1>
+    <!-- Header -->
+    <header class="dashboard-header shadow-sm">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div data-aos="fade-right" data-aos-duration="1000">
+                    <h1 class="fs-3 fw-bold mb-0"><i class="fas fa-graduation-cap me-2"></i>Student Portal</h1>
+                    <p class="text-blue-100 mb-0">Manage student profiles efficiently</p>
+                </div>
+                <div data-aos="fade-left" data-aos-duration="1000">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 d-none d-md-block">
+                            <p class="text-blue-100 mb-0">Welcome, Admin</p>
+                            <p class="text-white fw-medium mb-0">Academic Session 2025</p>
+                        </div>
+                        <div class="avatar-container">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container py-4">
+        <div class="row g-4">
+            <!-- Stats Cards -->
+            <div class="col-12" data-aos="fade-up" data-aos-duration="800">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 card-shadow h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle p-3 me-3" style="background-color: #dbeafe;">
+                                    <i class="fas fa-users text-blue-600 fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fs-4 fw-bold text-blue-900 mb-0">{{ students|length }}</h3>
+                                    <p class="text-secondary mb-0">Total Students</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 card-shadow h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle p-3 me-3" style="background-color: #dcfce7;">
+                                    <i class="fas fa-graduation-cap text-green-600 fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fs-4 fw-bold text-green-900 mb-0">5</h3>
+                                    <p class="text-secondary mb-0">Total Courses</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 card-shadow h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle p-3 me-3" style="background-color: #ffedd5;">
+                                    <i class="fas fa-book text-orange-600 fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fs-4 fw-bold text-orange-900 mb-0">12</h3>
+                                    <p class="text-secondary mb-0">Departments</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 card-shadow h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle p-3 me-3" style="background-color: #fae8ff;">
+                                    <i class="fas fa-calendar-check text-purple-600 fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fs-4 fw-bold text-purple-900 mb-0">25</h3>
+                                    <p class="text-secondary mb-0">Events</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Form -->
+            <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-duration="1000">
+                <div class="form-container">
+                    <h3 class="section-heading"><i class="fas fa-user-plus me-2 text-blue-500"></i>Student Registration</h3>
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="roll_number" class="form-label">Roll Number</label>
+                            <div class="position-relative">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" class="form-control input-with-icon" id="roll_number" name="roll_number" placeholder="Enter roll number" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last name" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="institute" class="form-label">Institute</label>
+                            <div class="position-relative">
+                                <i class="fas fa-university input-icon"></i>
+                                <input type="text" class="form-control input-with-icon" id="institute" name="institute" placeholder="Enter institute name" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="stream" class="form-label">Stream</label>
+                                <select class="form-select" id="stream" name="stream" required>
+                                    <option value="" selected disabled>Select Stream</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Electrical">Electrical</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Electronics">Electronics</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="year" class="form-label">Year</label>
+                                <select class="form-select" id="year" name="year" required>
+                                    <option value="" selected disabled>Select Year</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="position-relative">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" class="form-control input-with-icon" id="email" name="email" placeholder="student@example.com" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <div class="position-relative">
+                                <i class="fas fa-phone input-icon"></i>
+                                <input type="tel" class="form-control input-with-icon" id="phone_number" name="phone_number" placeholder="Enter phone number" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="video" class="form-label">Introduction Video</label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="video" name="video" accept="video/*">
+                                <span class="file-upload-text"><i class="fas fa-video me-2"></i>Upload introduction video</span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="selfie" class="form-label">Profile Photo</label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="selfie" name="selfie" accept="image/*">
+                                <span class="file-upload-text"><i class="fas fa-camera me-2"></i>Upload profile photo</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-soft w-100">
+                            <i class="fas fa-save me-2"></i>Save Student
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Student List -->
+            <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
+                <div class="card border-0 card-shadow mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="section-heading mb-0"><i class="fas fa-list me-2 text-blue-500"></i>Student Directory</h3>
+                            <div class="position-relative">
+                                <i class="fas fa-search input-icon"></i>
+                                <input type="text" id="searchInput" class="form-control input-with-icon" placeholder="Search students...">
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3" id="studentContainer">
+                            <!-- Student cards will be loaded here -->
+                            {% for student in students %}
+                            <div class="col-md-6 mb-3 student-card" data-name="{{ student.first_name }} {{ student.last_name }}" data-roll="{{ student.roll_number }}" data-institute="{{ student.institute }}">
+                                <div class="profile-card h-100 p-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="flex-shrink-0 me-3">
+                                            {% if student.selfie_url %}
+                                            <img src="{{ student.selfie_url }}" alt="Profile" class="rounded-circle border" width="60" height="60" style="object-fit: cover;">
+                                            {% else %}
+                                            <div class="rounded-circle bg-blue-100 text-blue-600 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title fs-5 mb-1">{{ student.first_name }} {{ student.last_name }}</h5>
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge-blue me-2">{{ student.stream }}</span>
+                                                <span class="badge-purple">{{ student.year }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-id-card me-2 text-blue-400"></i>
+                                            <span class="text-secondary">{{ student.roll_number }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-university me-2 text-blue-400"></i>
+                                            <span class="text-secondary">{{ student.institute }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-envelope me-2 text-blue-400"></i>
+                                            <span class="text-secondary">{{ student.email }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-phone me-2 text-blue-400"></i>
+                                            <span class="text-secondary">{{ student.phone_number }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex mt-2">
+                                        {% if student.video_url %}
+                                        <button class="btn btn-outline-soft btn-sm me-2 watch-video" data-video="{{ student.video_url }}">
+                                            <i class="fas fa-play me-1"></i> Watch Video
+                                        </button>
+                                        {% endif %}
+                                        <button class="btn btn-outline-soft btn-sm edit-student" 
+                                                data-roll="{{ student.roll_number }}"
+                                                data-first="{{ student.first_name }}"
+                                                data-last="{{ student.last_name }}"
+                                                data-institute="{{ student.institute }}"
+                                                data-stream="{{ student.stream }}"
+                                                data-year="{{ student.year }}"
+                                                data-email="{{ student.email }}"
+                                                data-phone="{{ student.phone_number }}">
+                                            <i class="fas fa-edit me-1"></i> Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Empty state when no students -->
+                        {% if not students %}
+                        <div class="text-center py-5" id="emptyState">
+                            <img src="/api/placeholder/200/200" alt="No students" class="mb-4" style="opacity: 0.6;">
+                            <h4 class="text-blue-900 fw-semibold">No Students Found</h4>
+                            <p class="text-secondary">Register your first student using the form.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Video Modal -->
+    <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-semibold text-blue-800"><i class="fas fa-video me-2 text-blue-500"></i>Student Introduction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="ratio ratio-16x9">
+                        <video id="studentVideo" controls></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Add Button (for mobile) -->
+    <div class="floating-btn d-lg-none" id="mobileAddBtn">
+        <i class="fas fa-plus fa-lg"></i>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="soft-bg py-3 mt-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-blue-900">&copy; 2025 Student Portal. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-blue-700">Made with <i class="fas fa-heart text-red-500"></i> for Students</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-    <!-- Form to Upload Student Data -->
-    <form action="/" method="POST" enctype="multipart/form-data">
-        <label>Roll Number:</label>
-        <input type="text" name="roll_number" required><br>
-
-        <label>First Name:</label>
-        <input type="text" name="first_name" required><br>
-
-        <label>Last Name:</label>
-        <input type="text" name="last_name" required><br>
-
-        <label>Institute:</label>
-        <input type="text" name="institute" required><br>
-
-        <label>Stream:</label>
-        <input type="text" name="stream" required><br>
-
-        <label>Year:</label>
-        <input type="text" name="year" required><br>
-
-        <label>Email:</label>
-        <input type="email" name="email" required><br>
-
-        <label>Phone Number:</label>
-        <input type="text" name="phone_number" required><br>
-
-        <label>Upload Video:</label>
-        <input type="file" name="video" accept="video/*"><br>
-
-        <label>Upload Selfie:</label>
-        <input type="file" name="selfie" accept="image/*"><br>
-
-        <button type="submit">Submit</button>
-    </form>
-
-    <hr>
-
-    <!-- Display Student Records -->
-    <h2>Student Records</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Roll Number</th>
-                <th>Name</th>
-                <th>Institute</th>
-                <th>Stream</th>
-                <th>Year</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Video</th>
-                <th>Selfie</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>{{ student.roll_number }}</td>
-                <td>{{ student.first_name }} {{ student.last_name }}</td>
-                <td>{{ student.institute }}</td>
-                <td>{{ student.stream }}</td>
-                <td>{{ student.year }}</td>
-                <td>{{ student.email }}</td>
-                <td>{{ student.phone_number }}</td>
-                <td>
-                    {% if student.video_url %}
-                        <a href="{{ student.video_url }}" target="_blank">View Video</a>
-                    {% else %}
-                        No Video
-                    {% endif %}
-                </td>
-                <td>
-                    {% if student.selfie_url %}
-                        <img src="{{ student.selfie_url }}" alt="Selfie" width="50">
-                    {% else %}
-                        No Image
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        // Initialize AOS animation library
+        AOS.init({
+            once: true
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form file upload label update
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    const fileName = e.target.files[0]?.name || '';
+                    const wrapper = this.closest('.file-upload-wrapper');
+                    const label = wrapper.querySelector('.file-upload-text');
+                    
+                    if (fileName) {
+                        const icon = this.id === 'video' ? 'fas fa-video' : 'fas fa-camera';
+                        label.innerHTML = `<i class="${icon} me-2"></i>${fileName}`;
+                        wrapper.style.borderColor = '#60a5fa';
+                    }
+                });
+            });
+            
+            // Video modal functionality
+            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+            const studentVideo = document.getElementById('studentVideo');
+            
+            document.querySelectorAll('.watch-video').forEach(button => {
+                button.addEventListener('click', function() {
+                    const videoUrl = this.getAttribute('data-video');
+                    studentVideo.src = videoUrl;
+                    videoModal.show();
+                });
+            });
+            
+            document.getElementById('videoModal').addEventListener('hidden.bs.modal', function() {
+                studentVideo.pause();
+                studentVideo.src = '';
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const studentCards = document.querySelectorAll('.student-card');
+            const emptyState = document.getElementById('emptyState');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                let visibleCount = 0;
+                
+                studentCards.forEach(card => {
+                    const name = card.getAttribute('data-name').toLowerCase();
+                    const roll = card.getAttribute('data-roll').toLowerCase();
+                    const institute = card.getAttribute('data-institute').toLowerCase();
+                    
+                    if (name.includes(searchTerm) || roll.includes(searchTerm) || institute.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                if (emptyState) {
+                    emptyState.style.display = visibleCount === 0 && studentCards.length > 0 ? 'block' : 'none';
+                }
+            });
+            
+            // Edit student functionality
+            document.querySelectorAll('.edit-student').forEach(button => {
+                button.addEventListener('click', function() {
+                    const roll = this.getAttribute('data-roll');
+                    const first = this.getAttribute('data-first');
+                    const last = this.getAttribute('data-last');
+                    const institute = this.getAttribute('data-institute');
+                    const stream = this.getAttribute('data-stream');
+                    const year = this.getAttribute('data-year');
+                    const email = this.getAttribute('data-email');
+                    const phone = this.getAttribute('data-phone');
+                    
+                    // Populate form
+                    document.getElementById('roll_number').value = roll;
+                    document.getElementById('first_name').value = first;
+                    document.getElementById('last_name').value = last;
+                    document.getElementById('institute').value = institute;
+                    document.getElementById('stream').value = stream;
+                    document.getElementById('year').value = year;
+                    document.getElementById('email').value = email;
+                    document.getElementById('phone_number').value = phone;
+                    
+                    // On mobile, scroll to form
+                    if (window.innerWidth < 992) {
+                        document.querySelector('.form-container').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                    
+                    // Highlight form
+                    const formContainer = document.querySelector('.form-container');
+                    formContainer.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3)';
+                    setTimeout(() => {
+                        formContainer.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.05)';
+                    }, 2000);
+                });
+            });
+            
+            // Mobile add button
+            const mobileAddBtn = document.getElementById('mobileAddBtn');
+            if (mobileAddBtn) {
+                mobileAddBtn.addEventListener('click', function() {
+                    document.querySelector('.form-container').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            }
+            
+            // Form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        });
+    </script>
 </body>
 </html>
