@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from cloudinary.uploader import upload
-from cloudinary.utils import cloudinary_url
 import cloudinary
 import os
-import urllib.parse
 
 # Cloudinary Configuration
 cloudinary.config(
@@ -17,30 +15,18 @@ app = Flask(__name__)
 
 # PostgreSQL Configuration
 def get_database_url():
-    # Try to get the database URL from environment
-    db_url = os.getenv('DATABASE_URL')
-    
-    # If not found, fall back to SQLite
-    if not db_url:
-        return 'sqlite:///students.db'
-    
-    # Modify Postgres URL to work with SQLAlchemy
-    if db_url.startswith('postgres://'):
-        db_url = db_url.replace('postgres://', 'postgresql://', 1)
-    
-    return db_url
+    db_url = os.getenv('DATABASE_URL', 'sqlite:///students.db')
+    return db_url.replace('postgres://', 'postgresql://', 1)
 
-# Set up database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = get_database_url()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
 
-# Initialize database
 db = SQLAlchemy(app)
 
 # Define Student Model
 class Student(db.Model):
-    __tablename__ = 'students'  # Explicitly set table name
+    __tablename__ = 'students'
     
     id = db.Column(db.Integer, primary_key=True)
     roll_number = db.Column(db.String(50), unique=True, nullable=False)
@@ -54,25 +40,17 @@ class Student(db.Model):
     video_url = db.Column(db.String(255))
     selfie_url = db.Column(db.String(255))
 
-# Database initialization with error handling
+# Initialize database
 def init_db():
-    try:
-        with app.app_context():
-            # Create all tables
-            db.create_all()
-            print("Database tables created successfully")
-    except Exception as e:
-        print(f"Error creating database tables: {e}")
-        raise
+    with app.app_context():
+        db.create_all()
+        print("Database initialized")
 
-# Initialize database when the app starts
-with app.app_context():
-    init_db()
+init_db()
 
 @app.route('/', methods=['GET', 'POST'])
 def student_dashboard():
     if request.method == 'POST':
-        # Handle form submission
         roll_number = request.form['roll_number']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
@@ -81,24 +59,23 @@ def student_dashboard():
         year = request.form['year']
         email = request.form['email']
         phone_number = request.form['phone_number']
-        
-        # Handle video upload
-        video_file = request.files.get('video')
-        if video_file:
-            video_upload = upload(video_file, resource_type="video")
-            video_url = video_upload['secure_url']
-        else:
-            video_url = None
-        
-        # Handle selfie upload
-        selfie_file = request.files.get('selfie')
-        if selfie_file:
-            selfie_upload = upload(selfie_file, resource_type="image")
-            selfie_url = selfie_upload['secure_url']
-        else:
-            selfie_url = None
-        
-        # Create or update student record
+
+        # Handle uploads to Cloudinary
+        video_url = None
+        if 'video' in request.files:
+            video_file = request.files['video']
+            if video_file:
+                video_upload = upload(video_file, resource_type="video")
+                video_url = video_upload['secure_url']
+
+        selfie_url = None
+        if 'selfie' in request.files:
+            selfie_file = request.files['selfie']
+            if selfie_file:
+                selfie_upload = upload(selfie_file, resource_type="image")
+                selfie_url = selfie_upload['secure_url']
+
+        # Add or update student record
         student = Student.query.filter_by(roll_number=roll_number).first()
         if not student:
             student = Student(
@@ -115,7 +92,6 @@ def student_dashboard():
             )
             db.session.add(student)
         else:
-            # Update existing student record
             student.first_name = first_name
             student.last_name = last_name
             student.institute = institute
@@ -123,13 +99,15 @@ def student_dashboard():
             student.year = year
             student.email = email
             student.phone_number = phone_number
-            student.video_url = video_url
-            student.selfie_url = selfie_url
-        
+            student.video_url = video_url or student.video_url
+            student.selfie_url = selfie_url or student.selfie_url
+
         db.session.commit()
         return redirect(url_for('student_dashboard'))
-    
-    return render_template('index.html')
+
+    # Fetch all student records
+    students = Student.query.all()
+    return render_template('index.html', students=students)
 
 if __name__ == '__main__':
     app.run(debug=True)
