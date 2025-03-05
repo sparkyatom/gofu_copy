@@ -4,6 +4,7 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 import cloudinary
 import os
+import urllib.parse
 
 # Cloudinary Configuration
 cloudinary.config(
@@ -13,10 +14,29 @@ cloudinary.config(
 )
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/students.db')
+
+# PostgreSQL Configuration
+# Parse the DATABASE_URL to handle special characters
+def get_database_url():
+    # First, try to get the database URL from environment
+    db_url = os.getenv('DATABASE_URL')
+    
+    # If not found, fall back to a local SQLite database
+    if not db_url:
+        return 'sqlite:///students.db'
+    
+    # If using Render's Postgres URL, modify it to work with SQLAlchemy
+    if db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
+    
+    return db_url
+
+# Set up database configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = get_database_url()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
 
+# Initialize database
 db = SQLAlchemy(app)
 
 class Student(db.Model):
@@ -44,7 +64,7 @@ def student_dashboard():
         year = request.form['year']
         email = request.form['email']
         phone_number = request.form['phone_number']
-
+        
         # Handle video upload
         video_file = request.files.get('video')
         if video_file:
@@ -52,7 +72,7 @@ def student_dashboard():
             video_url = video_upload['secure_url']
         else:
             video_url = None
-
+        
         # Handle selfie upload
         selfie_file = request.files.get('selfie')
         if selfie_file:
@@ -60,7 +80,7 @@ def student_dashboard():
             selfie_url = selfie_upload['secure_url']
         else:
             selfie_url = None
-
+        
         # Create or update student record
         student = Student.query.filter_by(roll_number=roll_number).first()
         if not student:
@@ -88,15 +108,17 @@ def student_dashboard():
             student.phone_number = phone_number
             student.video_url = video_url
             student.selfie_url = selfie_url
-
+        
         db.session.commit()
         return redirect(url_for('student_dashboard'))
-
+    
     return render_template('index.html')
 
-if __name__ == '__main__':
+# Database initialization
+def init_db():
     with app.app_context():
-        # Check if the database file exists before creating tables
-        if not os.path.exists('instance/students.db'):
-            db.create_all()
+        db.create_all()
+#edited
+if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
